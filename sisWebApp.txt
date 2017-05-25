@@ -1,0 +1,49 @@
+@POST
+localhost:8080/SimpleSchedulingApp1/api/v1/students
+
+@GET
+localhost:8080/SimpleSchedulingApp1/api/v1/students/1
+
+@GET
+localhost:8080/SimpleSchedulingApp1/api/v1/students
+
+@DELETE
+localhost:8080/SimpleSchedulingApp1/api/v1/students/1
+
+@PUT
+localhost:8080/SimpleSchedulingApp1/api/v1/students/1
+
+POST : crear
+GET : obtener
+PUT : editar/reemplazar
+PATCH : editar parcialmente
+DELETE : borrar
+
+// Solicitud Post Student:
+{
+  "studentId": 1,
+  "lastName": "Juan",
+  "firstName": "Perez",
+  "classCodes": [
+    {"INF-553"},
+    {"INF-142"}
+  ]
+}
+
+NUEVO METODO PARA GET:
+http://localhost:8080/SimpleSchedulingApp/webresources/students/1
+
+
+// Solicitud Post MyClass
+{
+  "code": "code1",
+  "title": "title1",
+  "description": "description1",
+  "studentIds": [
+    {1},
+    {2}
+  ]
+}
+
+
+
