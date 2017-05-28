@@ -81,18 +81,27 @@ public class Student {
 
     /**
      * @param classCodes the classCodes to set
+     * @return 
      */
-    public void setClassCodes(List<String> classCodes) {
-        this.classCodes = classCodes;
+    public List<String> setClassCodes(List<String> classCodes) {
+        List<String> invalidCodes = new ArrayList<>();
+        List<String> validCodes = new ArrayList<>();
         
-        for (String code : classCodes) {
+        classCodes.forEach((code) -> {
             MyClass myclass = GenericResource.getMyClassMap().get(code);
             if (myclass != null) {
+                validCodes.add(code);
                 if (!myclass.getStudentIds().contains(this.studentId)) {
                     myclass.getStudentIds().add(this.studentId);
                 }
+            } else {
+                invalidCodes.add(code);
             }
-        }
+        });
+        
+        this.classCodes = validCodes;
+        
+        return invalidCodes;
     }
     
 }

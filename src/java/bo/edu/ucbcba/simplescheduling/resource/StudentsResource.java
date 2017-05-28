@@ -5,6 +5,7 @@
  */
 package bo.edu.ucbcba.simplescheduling.resource;
 
+import bo.edu.ucbcba.simplescheduling.model.MyClass;
 import bo.edu.ucbcba.simplescheduling.model.Student;
 import bo.edu.ucbcba.simplescheduling.response.ErrorResponse;
 import com.google.gson.Gson;
@@ -91,8 +92,19 @@ public class StudentsResource {
 
             System.out.println("studentId=" + studentId + "lastName=" + lastName +
                     "firstName=" + firstName + "classCodes=" + classCodes);
+            
+            List<String> invalidCodes = student.setClassCodes(classCodes);
+            
             // create student
             GenericResource.putStudent(student);
+            
+            if (!invalidCodes.isEmpty()) {
+                ErrorResponse errorResponse = new ErrorResponse(UUID.randomUUID(),
+                              Response.Status.BAD_REQUEST, "ERR_002", "Creation with errors",
+                              "Invalid codes: " + invalidCodes.toString(), Arrays.asList("Algunas clases no existen"));
+                return Response.ok(gson.toJson(errorResponse), MediaType.APPLICATION_JSON)
+                               .status(Response.Status.OK).build();
+            }
             
             return Response.ok(gson.toJson(student), MediaType.APPLICATION_JSON).
                             status(Response.Status.CREATED).
@@ -113,6 +125,13 @@ public class StudentsResource {
         // search student
         Student student = GenericResource.getStudent(studentId);
         if (student != null) {
+            for (String code : student.getClassCodes()) {
+                MyClass myclass = GenericResource.getMyClass(code);
+                
+                if (myclass != null) {
+                    myclass.getStudentIds().remove(studentId);
+                }
+            }
             GenericResource.removeStudent(studentId);
         }
         return Response.status(Response.Status.NO_CONTENT).build();
@@ -139,15 +158,23 @@ public class StudentsResource {
             if (!student.getFirstName().isEmpty()) {
                 original.setFirstName(student.getFirstName());
             }
-            original.setClassCodes(student.getClassCodes());
+            List<String> invalidCodes = original.setClassCodes(student.getClassCodes());
 
             System.out.println("studentId=" + original.getStudentId() + 
                     "lastName=" + original.getLastName() +
                     "firstName=" + original.getFirstName() + 
                     "classCodes=" + original.getClassCodes());
-            // create student
+            // update student
             GenericResource.putStudent(original);
 
+            if (!invalidCodes.isEmpty()) {
+                ErrorResponse errorResponse = new ErrorResponse(UUID.randomUUID(),
+                              Response.Status.BAD_REQUEST, "ERR_002", "Creation with errors",
+                              "Invalid codes: " + invalidCodes.toString(), Arrays.asList("Algunas clases no existen"));
+                return Response.ok(gson.toJson(errorResponse), MediaType.APPLICATION_JSON)
+                               .status(Response.Status.OK).build();
+            }
+            
             return Response.ok(gson.toJson(original), MediaType.APPLICATION_JSON).
                             status(Response.Status.CREATED).
                             build();

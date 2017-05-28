@@ -80,12 +80,10 @@ public class ClassesResource {
             System.out.println("classCode=" + classCode + "title=" + title +
                     "description=" + description + "studentIds=" + studentIds);
             
-            myclass.setStudentIds(studentIds);
+            List<Integer> invalidIds = myclass.setStudentIds(studentIds);
             
             // create class
             GenericResource.putMyClass(myclass);
-            
-            List<Integer> invalidIds = GenericResource.getMyClassMap().get(classCode).setStudentIds(studentIds);
             
             if (!invalidIds.isEmpty()) {
                 ErrorResponse errorResponse = new ErrorResponse(UUID.randomUUID(),
@@ -94,6 +92,10 @@ public class ClassesResource {
                 return Response.ok(gson.toJson(errorResponse), MediaType.APPLICATION_JSON)
                                .status(Response.Status.OK).build();
             }
+            
+            return Response.ok(gson.toJson(myclass), MediaType.APPLICATION_JSON).
+                            status(Response.Status.CREATED).
+                            build();
         }
         
         ErrorResponse errorResponse = new ErrorResponse(UUID.randomUUID(),
@@ -110,6 +112,13 @@ public class ClassesResource {
         // search student
         MyClass myclass = GenericResource.getMyClass(classCode);
         if (myclass != null) {
+            for (Integer i : myclass.getStudentIds()) {
+                Student student = GenericResource.getStudentMap().get(i);
+                
+                if (student != null) {
+                    student.getClassCodes().remove(classCode);
+                }
+            }
             GenericResource.removeMyClass(classCode);
         }
         return Response.status(Response.Status.NO_CONTENT).build();
@@ -139,7 +148,7 @@ public class ClassesResource {
                     "Description=" + original.getDescription() + 
                     "studentIds=" + original.getStudentIds());
             
-            // create class
+            // update class
             GenericResource.putMyClass(original);
             
             if (!invalidIds.isEmpty()) {
@@ -149,6 +158,10 @@ public class ClassesResource {
                 return Response.ok(gson.toJson(errorResponse), MediaType.APPLICATION_JSON)
                                .status(Response.Status.OK).build();
             }
+            
+            return Response.ok(gson.toJson(original), MediaType.APPLICATION_JSON).
+                            status(Response.Status.CREATED).
+                            build();
         }
         
         return Response.status(Response.Status.BAD_REQUEST).build();
