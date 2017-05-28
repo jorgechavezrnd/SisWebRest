@@ -80,17 +80,27 @@ public class MyClass {
 
     /**
      * @param studentIds the studentIds to set
+     * @return 
      */
-    public void setStudentIds(List<Integer> studentIds) {
-        this.studentIds = studentIds;
+    public List<Integer> setStudentIds(List<Integer> studentIds) {
+        List<Integer> invalidIds = new ArrayList<>();
+        List<Integer> validIds = new ArrayList<>();
         
-        for (Integer i : studentIds) {
+        studentIds.forEach((i) -> {
             Student student = GenericResource.getStudentMap().get(i);
             if (student != null) {
+                validIds.add(i);
                 if (!student.getClassCodes().contains(this.code)) {
                     student.getClassCodes().add(this.code);
                 }
+            } else {
+                invalidIds.add(i);
             }
-        }
+        });
+        
+        this.studentIds = validIds;
+        
+        return invalidIds;
+        
     }
 }

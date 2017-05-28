@@ -79,12 +79,21 @@ public class ClassesResource {
 
             System.out.println("classCode=" + classCode + "title=" + title +
                     "description=" + description + "studentIds=" + studentIds);
-            // create student
+            
+            myclass.setStudentIds(studentIds);
+            
+            // create class
             GenericResource.putMyClass(myclass);
             
-            return Response.ok(gson.toJson(myclass), MediaType.APPLICATION_JSON).
-                            status(Response.Status.CREATED).
-                            build();
+            List<Integer> invalidIds = GenericResource.getMyClassMap().get(classCode).setStudentIds(studentIds);
+            
+            if (!invalidIds.isEmpty()) {
+                ErrorResponse errorResponse = new ErrorResponse(UUID.randomUUID(),
+                              Response.Status.BAD_REQUEST, "ERR_002", "Creation with errors",
+                              "Invalid ids: " + invalidIds.toString(), Arrays.asList("Algunos estudiantes no existen"));
+                return Response.ok(gson.toJson(errorResponse), MediaType.APPLICATION_JSON)
+                               .status(Response.Status.OK).build();
+            }
         }
         
         ErrorResponse errorResponse = new ErrorResponse(UUID.randomUUID(),
@@ -123,18 +132,23 @@ public class ClassesResource {
             if (!myclass.getDescription().isEmpty()) {
                 original.setDescription(myclass.getDescription());
             }
-            original.setStudentIds(myclass.getStudentIds());
+            List<Integer> invalidIds = original.setStudentIds(myclass.getStudentIds());
 
             System.out.println("classCode=" + original.getCode() + 
                     "title=" + original.getTitle() +
                     "Description=" + original.getDescription() + 
                     "studentIds=" + original.getStudentIds());
-            // create student
+            
+            // create class
             GenericResource.putMyClass(original);
-
-            return Response.ok(gson.toJson(original), MediaType.APPLICATION_JSON).
-                            status(Response.Status.CREATED).
-                            build();
+            
+            if (!invalidIds.isEmpty()) {
+                ErrorResponse errorResponse = new ErrorResponse(UUID.randomUUID(),
+                              Response.Status.BAD_REQUEST, "ERR_002", "Creation with errors",
+                              "Invalid ids: " + invalidIds.toString(), Arrays.asList("Algunos estudiantes no existen"));
+                return Response.ok(gson.toJson(errorResponse), MediaType.APPLICATION_JSON)
+                               .status(Response.Status.OK).build();
+            }
         }
         
         return Response.status(Response.Status.BAD_REQUEST).build();
